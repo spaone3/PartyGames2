@@ -1,4 +1,74 @@
-<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Home</title>
+  <link rel="stylesheet" href="styles/default.css">
+</head>
+<body>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" type="text" autocomplete="off" pattern="\d*" maxlength="4" placeholder="Enter 4-digit code" required />
+    <button id="join-button" disabled>Join Lobby</button>
+  </form>
+
+  <button id="lobby-button">Create Lobby</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+    $(function () {
+      const socket = io();
+
+      
+      $('#input').on('input', function() {
+        const isValid = this.checkValidity();
+        $('#join-button').prop('disabled', !isValid);
+      });
+
+
+      $('#join-button').click(function(){
+        const lobbyCode = $('#input').val() || 1;
+        console.log(lobbyCode);
+        window.location.href = `/lobby/${lobbyCode}`;
+      });
+    
+
+      $('#lobby-button').click(function(){
+        const lobbyCode = generateLobbyCode();
+        window.location.href = `/lobby/${lobbyCode}`;
+      });
+
+      function generateLobbyCode() {
+        return Math.floor(Math.random() * 8999+1000).toString();
+      }
+
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- views/index.ejs 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +78,12 @@
 </head>
 <body>
   <h1>Welcome, <%= username %>!</h1>
-<!-- views/index.ejs -->
-<form action="/user/set-username" method="post">
+
+  <form action="/user/set-username" method="post">
     <label for="username">Enter your username:</label>
     <input type="text" id="username" name="username" required>
     <button type="submit">Set Username</button>
   </form>
 </body>
 </html>
+-->
