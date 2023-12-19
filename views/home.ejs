@@ -30,6 +30,8 @@
 
 
       $('#join-button').click(function(){
+        event.preventDefault(); // Prevent form submission
+
         const lobbyCode = $('#input').val() || 1;
         console.log(lobbyCode);
         window.location.href = `/lobby/${lobbyCode}`;

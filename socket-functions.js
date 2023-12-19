@@ -1,4 +1,9 @@
 // socket-functions.js
+
+const lobbies = {};
+
+
+
 const initSocketFunctions = (io) => {
     io.on('connection', (socket) => {
       console.log('User connected:', socket.id);

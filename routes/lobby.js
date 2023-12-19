@@ -3,17 +3,19 @@ const router = express.Router();
 
 
 router.get('/', (req, res) => {
-    const { username } = req.session;
+    const { username } = req.session.username || 'Guest';
     console.log("x");
-    res.render('lobby', { username });
+
+    res.render('home', { username });
   });
   
 router.get('/:code', (req, res) => {
   const lobby = req.params.code;
-  console.log(lobby);
-  console.log("lobby/code stage");
+
   const username = req.session.username || 'Guest'; 
-   
+  req.session.code = lobby;
+  console.log(req.session);
+
 
   if (!lobby) {
     // Handle invalid or non-existent lobby codes
