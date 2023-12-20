@@ -10,15 +10,20 @@
   <h1>Welcome to the Lobby, <%= username %>!</h1>
 
 
-  <ul id="messages"></ul>
-
+  <ul id="messages">
+    <% if (chat && Array.isArray(chat.messages)) { %>
+      <% chat.messages.forEach(message => { %>
+        <li><%= message.username %>: <%= message.message %></li>
+      <% }); %>
+    <% } %>
+  </ul>
 
   <form id="chatForm" action="">
     <input id="input" autocomplete="off" placeholder="Type your message" required />
     <button type="submit">Send</button>
   </form>
 
-  <form action="/user/set-username" method="post">
+  <form id="usernameForm" action="/user/set-username" method="post">
     <label for="username">Enter your username:</label>
     <input type="text" id="username" name="username" required>
     <button type="submit">Set Username</button>
@@ -38,17 +43,6 @@
       
       const socket = io();
 
-
-      socket.emit('get chat');
-
-      socket.on('receive chat', function(chat, code){
-        chats = chat[code];
-        console.log(chats);
-        chats.messages.forEach(message =>{
-          $('#messages').append($('<li>').text(message.username + ': ' + message.message));
-
-        })
-      });
 
       socket.on('chat message2', function(data){
         console.log('testing');
@@ -83,6 +77,20 @@
         window.location.href = `/lobby/${data.lobbyCode}/${data.event}`;
       });
 
+
+
+
+
+
+
+      $('#usernameForm').submit(function(event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+      const username = $('#username').val();
+      socket.emit('set username', { username });
+      this.submit();
+
+    });
       
   
     });

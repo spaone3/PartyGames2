@@ -2,6 +2,8 @@
 
 const lobbies = {};
 const chat = {};
+const host = {};
+const status = {};
 
 
 
@@ -29,6 +31,26 @@ const initSocketFunctions = (io) => {
 
         });
 
+        socket.on('set username', (username) =>{
+          const id = socket.request.session.id;
+          const name = username.username;
+          const code = socket.request.session.code;
+          const currentLobby = lobbies[code];
+
+
+
+          console.log(currentLobby, id, name);
+          for(let i=0; i<currentLobby.players.length; i++){
+            const player = currentLobby.players[i];
+            if(player.id == id){
+              player.username = name;
+              break;
+            }
+          }
+          console.log(currentLobby);
+        });
+
+
 
 
         socket.on('get players', () =>{
@@ -43,11 +65,25 @@ const initSocketFunctions = (io) => {
         socket.on('play game', (event) =>{
 
           lobbyCode = socket.request.session.code;
-          eventName = 'switch games';
-          eventData = { lobbyCode, event };
 
-          emitEventToLobbyPlayers(lobbyCode, eventName, eventData, io, socket);
+          if(host[lobbyCode] == socket.request.session.id){
+            eventName = 'switch games';
+            eventData = { lobbyCode, event };
+            status[lobbyCode] = 'closed';
 
+            emitEventToLobbyPlayers(lobbyCode, eventName, eventData, io, socket);
+          }
+        });
+
+        socket.on('return to lobby', (event) =>{
+          lobbyCode = socket.request.session.code;
+          if(host[lobbyCode] == socket.request.session.id){
+            eventName = 'to lobby screen';
+            eventData = {lobbyCode};
+            status[lobbyCode] = 'open';
+
+            emitEventToLobbyPlayers(lobbyCode, eventName, eventData, io, socket);
+          }
         });
 
 
@@ -59,6 +95,8 @@ const initSocketFunctions = (io) => {
 
           lobbies[lobbyCode] = { players: [] };
           chat[lobbyCode] = { messages: [] };
+          host[lobbyCode] = socket.request.session.id;
+          status[lobbyCode] = 'open';
 
           addPlayerToLobby(lobbyCode, socket);
 
@@ -70,7 +108,7 @@ const initSocketFunctions = (io) => {
           lobbyCode = code.lobbyCode
 
           console.log(socket.request.session.id);
-          if(lobbies[lobbyCode]){
+          if(lobbies[lobbyCode] && status[lobbyCode] == 'open'){
             console.log('Valid Lobby Code');
             console.log(lobbyCode);
             
@@ -162,5 +200,5 @@ const initSocketFunctions = (io) => {
 
 
   
-  module.exports = { initSocketFunctions, chat };
+  module.exports = { initSocketFunctions, lobbies, chat, host };
   

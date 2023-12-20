@@ -28,7 +28,7 @@ io.use((socket, next) => {
 });
 
 const socketFunctions = require('./socket-functions');
-socketFunctions.initSocketFunctions(io);
+socketFunctions.initSocketFunctions(io, socketFunctions.lobbies, socketFunctions.chat, socketFunctions.host);
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));

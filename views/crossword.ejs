@@ -9,9 +9,18 @@
 <body>
   <h1>Welcome to the Crossword Lobby, <%= username %>!</h1>
 
+  <h3>Players:</h3>
 
-  <ul id="players"></ul>
+  <ul id="players">
+    <% if (players && Array.isArray(players.players)) { %>
+      <% players.players.forEach(player => { %>
+        <li><%= player.username %></li>
+      <% }); %>
+    <% } %>
+  </ul>
 
+
+  <button class="returnToLobby" data-event="return to lobby">Return to lobby</button>
 
   <div>Lobby Code: <%= lobby %> </div>
   <Div>Username: <%= username %> </Div>
@@ -35,7 +44,20 @@
       });
 
 
+      $('.returnToLobby').click(function() {
+        // Emit a custom socket event when the button is clicked
+        
+        const eventName = $(this).data('event');
+        console.log('RETURN TO LOBBY CLICKED');
+        socket.emit('return to lobby', eventName);
 
+      });
+
+
+      socket.on('to lobby screen', function(data){
+        console.log('RETURNING TO LOBBY');
+        window.location.href = `/lobby/${data.lobbyCode}`;
+      });
   
     });
   </script>
