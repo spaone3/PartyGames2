@@ -27,28 +27,16 @@
   <div>Lobby Code: <%= lobby %> </div>
   <Div>Username: <%= username %> </Div>
 
+  <button class="gameButton" data-event="wordle">Wordle</button>
+  <button class="gameButton" data-event="crossword">Crossword</button>
+
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script>
     $(function () {
+      
       const socket = io();
-
-      $('#chatForm').submit(function(){
-        const message = $('#input').val();
-        socket.emit('chat message', { username: '<%= username %>', message: message });
-        $('#input').val('');
-
-        socket.emit('test');
-
-
-        return false;
-      });
-
-      socket.on('chat message2', function(data){
-        console.log('testing');
-        $('#messages').append($('<li>').text(data.username + ': ' + data.message));
-      });
-
 
 
       socket.emit('get chat');
@@ -62,10 +50,38 @@
         })
       });
 
+      socket.on('chat message2', function(data){
+        console.log('testing');
+        $('#messages').append($('<li>').text(data.username + ': ' + data.message));
+      });
+
+
+      $('#chatForm').submit(function(){
+        const message = $('#input').val();
+        socket.emit('chat message', { username: '<%= username %>', message: message });
+        $('#input').val('');
+
+        socket.emit('test');
+        return false;
+      });
 
 
 
 
+      $('.gameButton').click(function() {
+        // Emit a custom socket event when the button is clicked
+        
+        const eventName = $(this).data('event');
+        console.log('GAME CLICKED');
+        socket.emit('play game', eventName);
+
+      });
+
+
+      socket.on('switch games', function(data){
+        console.log('SWITCH GAMES RECEIVED');
+        window.location.href = `/lobby/${data.lobbyCode}/${data.event}`;
+      });
 
       
   

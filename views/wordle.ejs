@@ -1,0 +1,43 @@
+<!-- views/chat.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle</title>
+</head>
+<body>
+  <h1>Welcome to the wordle Lobby, <%= username %>!</h1>
+
+
+  <ul id="players"></ul>
+
+
+  <div>Lobby Code: <%= lobby %> </div>
+  <Div>Username: <%= username %> </Div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+    $(function () {
+      
+      const socket = io();
+
+
+      socket.emit('get players');
+
+      socket.on('receive players', function(players, code){
+        playerList = players[code];
+        console.log(playerList);
+        //playerList.messages.forEach(message =>{
+         // $('#messages').append($('<li>').text(message.username + ': ' + message.message));
+        //})
+      });
+
+
+
+  
+    });
+  </script>
+</body>
+</html>

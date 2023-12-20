@@ -31,10 +31,24 @@ const initSocketFunctions = (io) => {
 
 
 
+        socket.on('get players', () =>{
+          console.log('GETTING PLAYERS');
+          code = socket.request.session.code;
+          socket.emit('receive players', lobbies, code);
+
+        });
 
 
 
+        socket.on('play game', (event) =>{
 
+          lobbyCode = socket.request.session.code;
+          eventName = 'switch games';
+          eventData = { lobbyCode, event };
+
+          emitEventToLobbyPlayers(lobbyCode, eventName, eventData, io, socket);
+
+        });
 
 
 
