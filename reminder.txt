@@ -1,8 +1,18 @@
 To do:
 
+Currently have working chatroom lobbies.
+
+
 Remove players when they disconnect from lobby, and not when page changes. 
 Use a page change socket emit to set a changing-page property to true, and check for that on disconnect.
 I need to be able to rotate through different pages to create this
 
 
-Emit an event to change the page for all users.
+
+1.) Rotate through pages
+2.) Remove players from lobbies, and delete lobby when 0 players
+3.) Make a simple game connectable and playable
+4.) Clean up things such as post request to change name, or deleting chat on reload.
+- I am going to have to allow reloads when playing wordle, and page cannot reset.
+
+Possibly changing the storing strategy of information to allow for better saving of data.

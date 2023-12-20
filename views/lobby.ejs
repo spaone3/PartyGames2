@@ -8,7 +8,11 @@
 </head>
 <body>
   <h1>Welcome to the Lobby, <%= username %>!</h1>
+
+
   <ul id="messages"></ul>
+
+
   <form id="chatForm" action="">
     <input id="input" autocomplete="off" placeholder="Type your message" required />
     <button type="submit">Send</button>
@@ -28,6 +32,7 @@
   <script>
     $(function () {
       const socket = io();
+
       $('#chatForm').submit(function(){
         const message = $('#input').val();
         socket.emit('chat message', { username: '<%= username %>', message: message });
@@ -43,6 +48,23 @@
         console.log('testing');
         $('#messages').append($('<li>').text(data.username + ': ' + data.message));
       });
+
+
+
+      socket.emit('get chat');
+
+      socket.on('receive chat', function(chat, code){
+        chats = chat[code];
+        console.log(chats);
+        chats.messages.forEach(message =>{
+          $('#messages').append($('<li>').text(message.username + ': ' + message.message));
+
+        })
+      });
+
+
+
+
 
 
       

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const chat = require('../socket-functions');
 
 
 router.get('/', (req, res) => {
@@ -15,6 +16,8 @@ router.get('/:code', (req, res) => {
   const username = req.session.username || 'Guest'; 
   req.session.code = lobby;
 
+  messages = chat[lobby];
+  console.log('Chat Messages:', messages);
 
   if (!lobby) {
     // Handle invalid or non-existent lobby codes
@@ -22,7 +25,7 @@ router.get('/:code', (req, res) => {
     return;
   }
   // Render the lobby page with the lobby data
-  res.render('lobby', { lobby, username });
+  res.render('lobby', { lobby, username});
 });
 
 

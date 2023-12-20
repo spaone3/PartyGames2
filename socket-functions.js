@@ -1,6 +1,7 @@
 // socket-functions.js
 
 const lobbies = {};
+const chat = {};
 
 
 
@@ -12,18 +13,38 @@ const initSocketFunctions = (io) => {
         socket.on("chat message", (data) => {
             console.log(data);
 
-
             code = socket.request.session.code;
+            chat[code].messages.push(data);
+            console.log(chat[code]);
 
             emitEventToLobbyPlayers(code, 'chat message2', data, io, socket);
 
         });
+
+
+        socket.on('get chat', () =>{
+          console.log('GETTING CHAT');
+          code = socket.request.session.code;
+          socket.emit('receive chat', chat, code);
+
+        });
+
+
+
+
+
+
+
+
+
+
 
         socket.on('create lobby', (code) => {
           lobbyCode = code.lobbyCode
           console.log(socket.request.session.id);
 
           lobbies[lobbyCode] = { players: [] };
+          chat[lobbyCode] = { messages: [] };
 
           addPlayerToLobby(lobbyCode, socket);
 
@@ -127,5 +148,5 @@ const initSocketFunctions = (io) => {
 
 
   
-  module.exports = { initSocketFunctions };
+  module.exports = { initSocketFunctions, chat };
   
