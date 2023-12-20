@@ -4,6 +4,9 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
     const username = req.session.username || 'Guest';
+    console.log(req.session.id);
+
+
     res.render('home', { username });
   });
 

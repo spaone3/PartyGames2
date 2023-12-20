@@ -1,0 +1,8 @@
+To do:
+
+Remove players when they disconnect from lobby, and not when page changes. 
+Use a page change socket emit to set a changing-page property to true, and check for that on disconnect.
+I need to be able to rotate through different pages to create this
+
+
+Emit an event to change the page for all users.

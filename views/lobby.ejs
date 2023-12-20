@@ -32,14 +32,20 @@
         const message = $('#input').val();
         socket.emit('chat message', { username: '<%= username %>', message: message });
         $('#input').val('');
+
+        socket.emit('test');
+
+
         return false;
       });
 
-      socket.on('chat message', function(data){
+      socket.on('chat message2', function(data){
+        console.log('testing');
         $('#messages').append($('<li>').text(data.username + ': ' + data.message));
       });
 
 
+      
   
     });
   </script>

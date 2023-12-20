@@ -5,25 +5,30 @@ const http = require('http');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
 
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const socketFunctions = require('./socket-functions');
-socketFunctions.initSocketFunctions(io);
-
-
-
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(cookieParser());
-app.use(session({
+
+const sessionMiddleware = session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false, maxAge: 365 * 24 * 60 * 60 * 1000 } // 1 year in milliseconds
-}));
+});
+
+// Use session middleware for all routes
+app.use(sessionMiddleware);
+
+// Use session middleware for Socket.IO connections
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+});
+
+const socketFunctions = require('./socket-functions');
+socketFunctions.initSocketFunctions(io);
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
@@ -35,7 +40,6 @@ const setUsername = require('./routes/userRoutes');
 app.use('/', homeRouter);
 app.use('/lobby', lobbyRouter);
 app.use('/user', setUsername);
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

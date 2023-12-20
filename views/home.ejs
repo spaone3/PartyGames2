@@ -33,13 +33,21 @@
         event.preventDefault(); // Prevent form submission
 
         const lobbyCode = $('#input').val() || 1;
-        console.log(lobbyCode);
-        window.location.href = `/lobby/${lobbyCode}`;
+        socket.emit('join lobby', { lobbyCode } );
       });
     
+      socket.on('redirect to lobby', (data) => {
+        console.log(data);
+        console.log('XXXXXXXXXXX');
+        window.location.href = `/lobby/${data.lobbyCode}`;
+      });
+
+
 
       $('#lobby-button').click(function(){
         const lobbyCode = generateLobbyCode();
+        socket.emit('create lobby', {lobbyCode});
+
         window.location.href = `/lobby/${lobbyCode}`;
       });
 

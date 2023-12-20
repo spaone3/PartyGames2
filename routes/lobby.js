@@ -14,7 +14,6 @@ router.get('/:code', (req, res) => {
 
   const username = req.session.username || 'Guest'; 
   req.session.code = lobby;
-  console.log(req.session);
 
 
   if (!lobby) {

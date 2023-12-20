@@ -1,0 +1,96 @@
+const express = require('express');
+const session = require('express-session');
+const http = require('http');
+const socketIo = require('socket.io');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Store lobby information
+const lobbies = {};
+
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.get('/', (req, res) => {
+  const username = req.session.username || 'Guest';
+  res.render('home', { username });
+});
+
+app.get('/lobby/:code', (req, res) => {
+  const lobbyCode = req.params.code;
+  const username = req.session.username || 'Guest';
+  req.session.lobbyCode = lobbyCode;
+
+  // Check if the lobby exists, if not, redirect to home
+  if (!lobbies[lobbyCode]) {
+    res.redirect('/');
+    return;
+  }
+
+  // Render the lobby page with the lobby data
+  res.render('lobby', {
+    lobbyCode,
+    username,
+    users: lobbies[lobbyCode].users,
+    messages: lobbies[lobbyCode].messages,
+  });
+});
+
+io.on('connection', (socket) => {
+  const lobbyCode = socket.request.session.lobbyCode;
+
+  // If the user has a lobbyCode, join the lobby
+  if (lobbyCode) {
+    socket.join(lobbyCode);
+
+    // Add the user to the lobby
+    if (!lobbies[lobbyCode]) {
+      lobbies[lobbyCode] = { users: [], messages: [] };
+    }
+    lobbies[lobbyCode].users.push({ username: socket.username, socketId: socket.id });
+
+    // Broadcast to all users in the lobby that a new user has joined
+    io.to(lobbyCode).emit('user-joined', { username: socket.username });
+
+    // Emit the updated user list to the new user
+    io.to(socket.id).emit('update-users', lobbies[lobbyCode].users);
+  }
+
+  // Handle chat messages
+  socket.on('chat message', (data) => {
+    const lobbyCode = socket.request.session.lobbyCode;
+    lobbies[lobbyCode].messages.push({ username: data.username, message: data.message });
+
+    // Broadcast the message to all users in the lobby
+    io.to(lobbyCode).emit('chat message', { username: data.username, message: data.message });
+  });
+
+  // Handle user disconnect
+  socket.on('disconnect', () => {
+    const lobbyCode = socket.request.session.lobbyCode;
+
+    // Remove the user from the lobby
+    if (lobbies[lobbyCode]) {
+      lobbies[lobbyCode].users = lobbies[lobbyCode].users.filter(user => user.socketId !== socket.id);
+
+      // Broadcast to all users in the lobby that a user has left
+      io.to(lobbyCode).emit('user-left', { username: socket.username });
+
+      // If no users are left, delete the lobby
+      if (lobbies[lobbyCode].users.length === 0) {
+        delete lobbies[lobbyCode];
+      }
+    }
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+`
