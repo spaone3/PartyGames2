@@ -138,7 +138,10 @@ const initSocketFunctions = (io) => {
 
         socket.on('generate word', () =>{
           code = socket.request.session.code;
-          wordleInfo[code] =  { status: 0, randomWord: 'ocean', currentWord: '', guessesRemaining: 6, nextLetter: 0};
+
+          let word = WORDS[Math.floor(Math.random() * WORDS.length)]
+          console.log(word)
+          wordleInfo[code] =  { status: 0, randomWord: word, currentWord: '', guessesRemaining: 6, nextLetter: 0};
         });
 
 
