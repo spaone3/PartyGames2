@@ -6,7 +6,7 @@ const host = {};
 const status = {};
 const wordleInfo = {};
 
-
+const { WORDS } = require("./words.js");
 
 const initSocketFunctions = (io) => {
     io.on('connection', (socket) => {
@@ -77,32 +77,68 @@ const initSocketFunctions = (io) => {
         });
 
 
-        socket.on('letter input', ({ letter }) => {
+        socket.on('letter input', ( letter1 ) => {
           // Process the letter, update the word, and broadcast it to all clients
+          console.log(wordleInfo[code].status );
+          if(wordleInfo[code].status == 1) return;
+          letter = letter1.letter;
           code = socket.request.session.code;
           currentWord = wordleInfo[code].currentWord;
-          console.log(letter);
-          if(currentWord.length != 5 && isAlphabetic(letter)){
+          //console.log(letter);
 
-          updatedWord = currentWord + letter;
-          wordleInfo[code].currentWord = updatedWord;
+          if(wordleInfo[code].guessesRemaining == 0) return;
 
-          console.log(updatedWord);
-          emitEventToLobbyPlayers(code, 'update word', updatedWord, io, socket)
+          //console.log(letter, wordleInfo[code].nextLetter )
 
-          }if(letter == 'Backspace'){
+          if(letter == 'Backspace' && wordleInfo[code].nextLetter !=0){
             updatedWord = currentWord.slice(0, -1);
-            console.log('DELETION');
             wordleInfo[code].currentWord = updatedWord;
-            emitEventToLobbyPlayers(code, 'update word', updatedWord, io, socket)
+            console.log('DELETION', updatedWord);
+
+            info = {nextLetter: wordleInfo[code].nextLetter, guessesRemaining: wordleInfo[code].guessesRemaining };
+            emitEventToLobbyPlayers(code, 'delete letter',  info, io, socket);
+            wordleInfo[code].nextLetter -=1;
+            return;
+          }
 
 
+          if(letter == 'Enter'){
+
+            info = {nextLetter: wordleInfo[code].nextLetter, guessesRemaining: wordleInfo[code].guessesRemaining, currentWord: wordleInfo[code].currentWord, WORDS: WORDS, rightGuess: wordleInfo[code].randomWord }
+            emitEventToLobbyPlayers(code, 'check guess', info, io, socket);
+
+          }
+
+
+
+          if(isAlphabetic(letter) && wordleInfo[code].nextLetter != 5){
+            updatedWord = currentWord + letter;
+            wordleInfo[code].currentWord = updatedWord;
+
+            info = {nextLetter: wordleInfo[code].nextLetter, letter: letter, guessesRemaining: wordleInfo[code].guessesRemaining };
+            emitEventToLobbyPlayers(code, 'add letter', info, io, socket);
+            wordleInfo[code].nextLetter +=1;
           }
         });
 
+
+        socket.on('valid guess', (info) =>{
+          console.log(info);
+          wordleInfo[code].nextLetter = info.nextLetter;
+          wordleInfo[code].guessesRemaining = info.guessesRemaining;
+          wordleInfo[code].currentWord = info.currentGuess;
+        });
+
+        socket.on('game over', () =>{
+          console.log('GAME OVER');
+          wordleInfo[code].status = 1;
+        });
+
+
+
         socket.on('generate word', () =>{
           code = socket.request.session.code;
-          wordleInfo[code] =  {randomWord: 'Ocean', currentWord: ''};
+          wordleInfo[code] =  { status: 0, randomWord: 'ocean', currentWord: '', guessesRemaining: 6, nextLetter: 0};
         });
 
 
