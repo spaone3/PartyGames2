@@ -33,17 +33,6 @@
       const socket = io();
 
 
-      socket.emit('get players');
-
-      socket.on('receive players', function(players, code){
-        playerList = players[code];
-        console.log(playerList);
-        //playerList.messages.forEach(message =>{
-         // $('#messages').append($('<li>').text(message.username + ': ' + message.message));
-        //})
-      });
-
-
       $('.returnToLobby').click(function() {
         // Emit a custom socket event when the button is clicked
         

@@ -4,6 +4,7 @@ const lobbies = {};
 const chat = {};
 const host = {};
 const status = {};
+const wordleInfo = {};
 
 
 
@@ -51,17 +52,6 @@ const initSocketFunctions = (io) => {
         });
 
 
-
-
-        socket.on('get players', () =>{
-          console.log('GETTING PLAYERS');
-          code = socket.request.session.code;
-          socket.emit('receive players', lobbies, code);
-
-        });
-
-
-
         socket.on('play game', (event) =>{
 
           lobbyCode = socket.request.session.code;
@@ -86,6 +76,34 @@ const initSocketFunctions = (io) => {
           }
         });
 
+
+        socket.on('letter input', ({ letter }) => {
+          // Process the letter, update the word, and broadcast it to all clients
+          code = socket.request.session.code;
+          currentWord = wordleInfo[code].currentWord;
+          console.log(letter);
+          if(currentWord.length != 5 && isAlphabetic(letter)){
+
+          updatedWord = currentWord + letter;
+          wordleInfo[code].currentWord = updatedWord;
+
+          console.log(updatedWord);
+          emitEventToLobbyPlayers(code, 'update word', updatedWord, io, socket)
+
+          }if(letter == 'Backspace'){
+            updatedWord = currentWord.slice(0, -1);
+            console.log('DELETION');
+            wordleInfo[code].currentWord = updatedWord;
+            emitEventToLobbyPlayers(code, 'update word', updatedWord, io, socket)
+
+
+          }
+        });
+
+        socket.on('generate word', () =>{
+          code = socket.request.session.code;
+          wordleInfo[code] =  {randomWord: 'Ocean', currentWord: ''};
+        });
 
 
 
@@ -127,11 +145,6 @@ const initSocketFunctions = (io) => {
 
 
 
-        socket.on('test', ()=> {
-          console.log(socket.request.session.id);
-        });
-
-
       socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
       });
@@ -150,12 +163,18 @@ const initSocketFunctions = (io) => {
   
     }
 
-
+    function isAlphabetic(character) {
+      // Regular expression to match alphabetic characters
+      const alphabeticRegex = /^[a-zA-Z]$/;
+      
+      // Test if the character matches the alphabetic pattern
+      return alphabeticRegex.test(character);
+    }
 
     function emitEventToLobbyPlayers(lobbyCode, eventName, eventData, io, socket) {
       const lobby = lobbies[lobbyCode];
-      console.log('\n\n');
-      console.log(lobbyCode, eventName, eventData);
+      //console.log('\n\n');
+      //console.log(lobbyCode, eventName, eventData);
     
       if (lobby) {
         // Iterate over the players in the lobby and emit the event to each player

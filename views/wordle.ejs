@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wordle</title>
+  <link type="text/css" rel="stylesheet" href="/styles/wordleStyle.css">
+
 </head>
 <body>
-  <h1>Welcome to the wordle Lobby, <%= username %>!</h1>
 
   <h3>Players:</h3>
 
@@ -18,11 +19,13 @@
       <% }); %>
     <% } %>
   </ul>
-
   <button class="returnToLobby" data-event="return to lobby">Return to lobby</button>
-
   <div>Lobby Code: <%= lobby %> </div>
   <Div>Username: <%= username %> </Div>
+  <div id="wordDisplay"></div>
+
+
+
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -31,16 +34,25 @@
       
       const socket = io();
 
+      socket.emit('generate word'); 
 
-      socket.emit('get players');
 
-      socket.on('receive players', function(players, code){
-        playerList = players[code];
-        console.log(playerList);
-        //playerList.messages.forEach(message =>{
-         // $('#messages').append($('<li>').text(message.username + ': ' + message.message));
-        //})
+
+      socket.on('update word', function(word) {
+        $('#wordDisplay').text(word);
       });
+
+
+
+      document.addEventListener("keyup", (e) => {
+          const pressedKey = e.key;
+          console.log(pressedKey);
+          socket.emit('letter input', { letter: pressedKey });
+      });
+
+
+
+
 
 
       $('.returnToLobby').click(function() {
